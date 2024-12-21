@@ -1,0 +1,3 @@
+sudo chmod +x /usr/bin/chromedriver
+chmod +x youtube_channel_downloader.sh
+./youtube_channel_downloader.sh

@@ -21,7 +21,7 @@ https://www.youtube.com/@mente_em_acao
 # apenas live:
 https://www.youtube.com/@liveteste446
 
-# teste print pagina principal:
+# teste print pagina principal, logo e banner:
 https://www.youtube.com/@eleftheria_
 
 # teste thumbnail:

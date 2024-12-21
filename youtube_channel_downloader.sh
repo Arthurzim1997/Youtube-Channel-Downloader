@@ -152,6 +152,182 @@ move_thumbnails() {
   done
 }
 
+# Função para capturar e baixar a logo do canal
+capture_logo() {
+  log "Capturando a logo do canal..."
+
+  # Usando Python com Selenium para capturar a logo
+  python3 <<EOF
+import os
+import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from urllib.parse import urlparse
+
+# Caminho do seu chromedriver
+chromedriver_path = "$CHROME_DRIVER_PATH"  # Caminho do chromedriver
+
+# Configuração do Chrome
+options = Options()
+options.add_argument("--headless")  # Roda em modo headless (sem interface gráfica)
+options.add_argument("--disable-gpu")  # Desabilita GPU (útil para sistemas com recursos limitados)
+
+# Inicia o serviço do ChromeDriver
+service = Service(chromedriver_path)
+
+# Inicializa o driver
+driver = webdriver.Chrome(service=service, options=options)
+
+# Acesse a URL do canal
+driver.get("$CHANNEL_URL")
+
+try:
+    # Espera até que o link da logo esteja presente na página
+    print("Aguardando a logo carregar...")
+    WebDriverWait(driver, 30).until(
+        EC.presence_of_element_located((By.XPATH, "//link[@itemprop='thumbnailUrl']"))
+    )
+    
+    # Encontrar o elemento da logo
+    logo_element = driver.find_element(By.XPATH, "//link[@itemprop='thumbnailUrl']")
+    
+    # Extrai a URL da logo
+    logo_url = logo_element.get_attribute("href")
+    print(f"Logo URL encontrada: {logo_url}")
+
+    # Obtém a extensão da imagem a partir da URL
+    parsed_url = urlparse(logo_url)
+    file_extension = os.path.splitext(parsed_url.path)[1]  # Obtém a extensão do arquivo
+
+    if not file_extension:
+        file_extension = ".jpg"  # Caso não consiga obter a extensão, default para .jpg
+
+    # Nome do arquivo com a extensão correta
+    logo_filename = f"channel_logo{file_extension}"
+
+    # Baixa a imagem da logo
+    print(f"Baixando a logo da URL: {logo_url}")
+    response = requests.get(logo_url, stream=True)
+    
+    if response.status_code == 200:
+        with open(os.path.join("$OUTPUT_DIR", logo_filename), 'wb') as file:
+            for chunk in response.iter_content(1024):
+                file.write(chunk)
+        print(f"Logo do canal salva em: {os.path.join('$OUTPUT_DIR', logo_filename)}")
+    else:
+        print(f"Falha ao baixar a logo. Status code: {response.status_code}. URL da logo: {logo_url}")
+
+    # Fecha o navegador
+    driver.quit()
+
+except Exception as e:
+    driver.quit()
+    print(f"Falha ao capturar a logo: {e}")
+    exit(1)
+
+EOF
+
+  # Verifica se a logo foi salva corretamente
+  if [ -f "$OUTPUT_DIR/channel_logo.jpg" ]; then
+    success "Logo salva em: $OUTPUT_DIR/channel_logo.jpg"
+  else
+    error "Falha ao capturar a logo."
+    exit 1
+  fi
+}
+
+# Função para capturar e baixar o banner do canal
+capture_banner() {
+  log "Capturando o banner do canal..."
+
+  # Usando Python com Selenium para capturar o banner
+  python3 <<EOF
+import os
+import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from urllib.parse import urlparse
+
+# Caminho do seu chromedriver
+chromedriver_path = "$CHROME_DRIVER_PATH"  # Caminho do chromedriver
+
+# Configuração do Chrome
+options = Options()
+options.add_argument("--headless")  # Roda em modo headless (sem interface gráfica)
+options.add_argument("--disable-gpu")  # Desabilita GPU (útil para sistemas com recursos limitados)
+
+# Inicia o serviço do ChromeDriver
+service = Service(chromedriver_path)
+
+# Inicializa o driver
+driver = webdriver.Chrome(service=service, options=options)
+
+# Acesse a URL do canal
+driver.get("$CHANNEL_URL")
+
+try:
+    # Espera até que o link do banner esteja presente na página
+    print("Aguardando o banner carregar...")
+    WebDriverWait(driver, 30).until(
+        EC.presence_of_element_located((By.XPATH, "//img[contains(@class, 'yt-core-image')]"))
+    )
+    
+    # Encontrar o elemento do banner
+    banner_element = driver.find_element(By.XPATH, "//img[contains(@class, 'yt-core-image')]")
+    
+    # Extrai a URL do banner
+    banner_url = banner_element.get_attribute("src")
+    print(f"banner URL encontrada: {banner_url}")
+
+    # Obtém a extensão da imagem a partir da URL
+    parsed_url = urlparse(banner_url)
+    file_extension = os.path.splitext(parsed_url.path)[1]  # Obtém a extensão do arquivo
+
+    if not file_extension:
+        file_extension = ".jpg"  # Caso não consiga obter a extensão, default para .jpg
+
+    # Nome do arquivo com a extensão correta
+    banner_filename = f"channel_banner{file_extension}"
+
+    # Baixa a imagem do banner
+    print(f"Baixando o banner da URL: {banner_url}")
+    response = requests.get(banner_url, stream=True)
+    
+    if response.status_code == 200:
+        with open(os.path.join("$OUTPUT_DIR", banner_filename), 'wb') as file:
+            for chunk in response.iter_content(1024):
+                file.write(chunk)
+        print(f"banner do canal salva em: {os.path.join('$OUTPUT_DIR', banner_filename)}")
+    else:
+        print(f"Falha ao baixar o banner. Status code: {response.status_code}. URL do banner: {banner_url}")
+
+    # Fecha o navegador
+    driver.quit()
+
+except Exception as e:
+    driver.quit()
+    print(f"Falha ao capturar o banner: {e}")
+    exit(1)
+
+EOF
+
+  # Verifica se o banner foi salvo corretamente
+  if [ -f "$OUTPUT_DIR/channel_banner.jpg" ]; then
+    success "banner salvo em: $OUTPUT_DIR/channel_banner.jpg"
+  else
+    error "Falha ao capturar o banner."
+    exit 1
+  fi
+}
+
 # Função para capturar screenshot com a melhor resolução possível
 capture_screenshot() {
   log "Capturando screenshot da página inicial do canal..."
@@ -260,6 +436,12 @@ main() {
 
   log "Movendo as thumbnails para as pastas corretas..."
   move_thumbnails
+
+  log "iniciando a captura da logo do canal..."
+  capture_logo  # Captura da logo
+
+  log "iniciando a captura do banner do canal..."
+  capture_banner  # Captura o banner
 
   log "Capturando página inicial do canal..."
   capture_screenshot

@@ -112,15 +112,15 @@ download_videos() {
   SHORTS_URL="https://www.youtube.com/@$CHANNEL_NAME/shorts"
   
   # Baixar vídeos da aba de vídeos e também as thumbnails
-  yt-dlp -ciw --write-thumbnail --no-write-info-json -o "$VIDEOS_DIR/A%(upload_date>%Y)s-M%(upload_date>%m)s-D%(upload_date>%d)s_%(timestamp>%H)02dh%(timestamp>%M)02dm%(timestamp>%S)02ds-%(title)s.%(ext)s" \
+  yt-dlp -f bestvideo+bestaudio -ciw --write-thumbnail --no-write-info-json -o "$VIDEOS_DIR/A%(upload_date>%Y)s-M%(upload_date>%m)s-D%(upload_date>%d)s_%(timestamp>%H)02dh%(timestamp>%M)02dm%(timestamp>%S)02ds-%(title)s.%(ext)s" \
          --yes-playlist "$VIDEOS_URL" || true  # Continue mesmo que falhe
 
   # Baixar somente lives da aba de lives e também as thumbnails
-  yt-dlp -ciw --write-thumbnail --no-write-info-json -o "$LIVES_DIR/A%(upload_date>%Y)s-M%(upload_date>%m)s-D%(upload_date>%d)s_%(timestamp>%H)02dh%(timestamp>%M)02dm%(timestamp>%S)02ds-%(title)s.%(ext)s" \
+  yt-dlp -f bestvideo+bestaudio -ciw --write-thumbnail --no-write-info-json -o "$LIVES_DIR/A%(upload_date>%Y)s-M%(upload_date>%m)s-D%(upload_date>%d)s_%(timestamp>%H)02dh%(timestamp>%M)02dm%(timestamp>%S)02ds-%(title)s.%(ext)s" \
          --yes-playlist "$LIVES_URL" || true  # Continue mesmo que falhe
 
   # Baixar shorts da aba de shorts (sem thumbnails)
-  yt-dlp -ciw -o "$SHORTS_DIR/A%(upload_date>%Y)s-M%(upload_date>%m)s-D%(upload_date>%d)s_%(timestamp>%H)02dh%(timestamp>%M)02dm%(timestamp>%S)02ds-%(title)s.%(ext)s" \
+  yt-dlp -f bestvideo+bestaudio -ciw -o "$SHORTS_DIR/A%(upload_date>%Y)s-M%(upload_date>%m)s-D%(upload_date>%d)s_%(timestamp>%H)02dh%(timestamp>%M)02dm%(timestamp>%S)02ds-%(title)s.%(ext)s" \
          --yes-playlist "$SHORTS_URL" || true  # Continue mesmo que falhe
 
   success "Downloads concluídos (se houver conteúdo)."
